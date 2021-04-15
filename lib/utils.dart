@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+Map<String, dynamic> GlobalState = {
+  "isLogin": false,
+  "token": "",
+  "userInfo": ""
+};
 
 class LoadingDialog extends StatelessWidget {
   final String message;

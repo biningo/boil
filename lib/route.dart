@@ -10,5 +10,6 @@ Map<String, WidgetBuilder> routes = {
   "/tagDetail": (context) => TagDetailPage(),
   "/write": (context) => WriteBoilPage(),
   "/user": (context) => Tabs(currentIndex: 2),
+  "/home": (context) => Tabs(currentIndex: 0),
   "/user/message": (context) => UserMessagePage()
 };

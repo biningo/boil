@@ -1,16 +1,38 @@
+import 'package:boil/network.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import 'home.dart';
+
 class TagDetailPage extends StatelessWidget {
-  TagDetailPage({Key key}) : super(key: key);
+  const TagDetailPage({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var args = ModalRoute.of(context).settings.arguments;
+    Map args = ModalRoute.of(context).settings.arguments;
     return Scaffold(
       appBar: AppBar(
-        title: Text("标签# " + args),
+        title: Text("标签# " + args["title"]),
       ),
-      body: Text("...."),
+      body: Container(
+        color: Colors.amber[50],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            return Future.value(true);
+          },
+          child: ListView.builder(
+            itemCount: args["boilList"].length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                child: BoilItem(args["boilList"][index]),
+                onTap: () {
+                  Navigator.pushNamed(context, "/boil/detail");
+                },
+              );
+            },
+          ),
+        ),
+      ),
     );
   }
 }
@@ -23,88 +45,47 @@ class TagsPage extends StatefulWidget {
 }
 
 class _TagsPageState extends State<TagsPage> {
+  List tags = [];
+
+  @override
+  void initState() {
+    super.initState();
+    InitTagList();
+  }
+
+  void InitTagList() async {
+    Response resp = await dio.get("/tag/list");
+    setState(() {
+      tags = resp.data["data"];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<Widget> arr = [
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '工作',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "工作");
-        },
-        pressElevation: 20,
-      ),
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '生活',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "生活");
-        },
-        pressElevation: 20,
-      ),
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '美食',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "美食");
-        },
-        pressElevation: 20,
-      ),
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '爱情',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "爱情");
-        },
-        pressElevation: 20,
-      ),
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '旅游',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "旅游");
-        },
-        pressElevation: 20,
-      ),
-      RawChip(
-        avatar: Icon(Icons.tag),
-        label: Text(
-          '其他',
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(fontSize: 20.0),
-        ),
-        elevation: 10,
-        onPressed: () {
-          Navigator.pushNamed(context, "/tagDetail", arguments: "其它");
-        },
-        pressElevation: 20,
-      )
-    ];
+    List<Widget> tagChips = this
+        .tags
+        .map(
+          (val) => RawChip(
+            avatar: Icon(Icons.tag),
+            label: Text(
+              val['title'],
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 20.0),
+            ),
+            elevation: 10,
+            onPressed: () async {
+              Response resp = await dio.get("/boil/list/tag/${val['id']}");
+              List tagBoilList = resp.data["data"];
+              Navigator.pushNamed(context, "/tagDetail", arguments: {
+                "title": val["title"],
+                "id": val["id"],
+                "boilList": tagBoilList
+              });
+            },
+            pressElevation: 20,
+          ),
+        )
+        .toList();
     return Container(
       alignment: Alignment.center,
       padding: EdgeInsets.all(10.0),
@@ -113,7 +94,7 @@ class _TagsPageState extends State<TagsPage> {
             crossAxisCount: 3, //横轴三个子widget
             childAspectRatio: 2 //宽高比为1时，子widget
             ),
-        children: arr,
+        children: tagChips,
       ),
     );
   }

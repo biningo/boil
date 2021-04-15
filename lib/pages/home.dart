@@ -1,4 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
+import '../network.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -8,40 +11,56 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List msg = ["最近过得好吗?"];
-  _HomePageState() {
-    for (int i = 0; i < 20; i++) {
-      this.msg.add("这是一个可爱的个性签名，这是一个可爱的个性签名这是一个可爱的个性签名");
-    }
+  List boilList = [];
+  @override
+  void initState() {
+    super.initState();
+    InitBoil();
   }
+
+  void InitBoil() async {
+    Response resp = await dio.get("/boil/all");
+    setState(() {
+      this.boilList = resp.data["data"];
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Colors.amber[50],
-      child: ListView.builder(
-        itemCount: this.msg.length,
-        itemBuilder: (context, index) {
-          return InkWell(
-            child: BoilItem(content: this.msg[index]),
-            onTap: () {
-              Navigator.pushNamed(context, "/boil/detail");
-            },
-          );
+      child: RefreshIndicator(
+        onRefresh: () async {
+          InitBoil();
+          return Future.value(true);
         },
+        child: ListView.builder(
+          itemCount: this.boilList.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              child: BoilItem(this.boilList[index]),
+              onTap: () {
+                Navigator.pushNamed(context, "/boil/detail",
+                    arguments: this.boilList[index]);
+              },
+            );
+          },
+        ),
       ),
     );
   }
 }
 
-class BoilItem extends StatelessWidget {
-  String content;
-  BoilItem({Key key, this.content = ""}) : super(key: key);
+List<Widget> boilBottom = [
+  LikeBoil(title: "点赞", iconData: Icons.star),
+  LikeBoil(title: "评论", iconData: Icons.app_registration),
+  LikeBoil(title: "转发", iconData: Icons.adjust_sharp),
+];
 
-  List<Widget> boilBottom = [
-    LikeBoil(title: "点赞", iconData: Icons.star),
-    LikeBoil(title: "点赞", iconData: Icons.star),
-    LikeBoil(title: "点赞", iconData: Icons.star),
-  ];
+class BoilItem extends StatelessWidget {
+  Map boilVo;
+  BoilItem(this.boilVo, {Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -52,17 +71,20 @@ class BoilItem extends StatelessWidget {
             InkWell(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: Colors.white,
+                  backgroundImage: NetworkImage(
+                      "https://blog.icepan.cloud/${boilVo["userAvatarId"]}.jpg"),
+                  radius: 30,
                 ),
                 title: Row(
                   children: [
                     Text(
-                      "网名:浪迹天涯",
+                      "网名:${boilVo['username']}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     SizedBox(width: 10),
                     Text(
-                      "十分钟前",
+                      boilVo["createTime"],
                       style: TextStyle(
                         fontSize: 10.0,
                         fontWeight: FontWeight.w100,
@@ -72,13 +94,16 @@ class BoilItem extends StatelessWidget {
                   ],
                 ),
                 subtitle: Text(
-                  content,
+                  boilVo["userBio"],
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
               ),
               onTap: () {
-                print("user");
+                showDialog(
+                    context: context,
+                    builder: (context) =>
+                        AlertDialog(title: Text(boilVo["username"])));
               },
             ),
             Container(
@@ -86,9 +111,7 @@ class BoilItem extends StatelessWidget {
                   EdgeInsets.fromLTRB(10, 5, 10, 10), //left top right bottom
               alignment: Alignment.topLeft,
               child: Text(
-                "内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容" +
-                    "内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容" +
-                    "内容这是内容这是内容这是内容这是内容这是内容这是内容这是内容",
+                boilVo["content"],
                 style: TextStyle(fontSize: 15.0),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
@@ -103,15 +126,21 @@ class BoilItem extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0)),
                     label: Text(
-                      "幽默",
+                      boilVo["tagTitle"],
                       style: TextStyle(
                           color: Colors.blue[300],
                           fontWeight: FontWeight.bold,
                           fontSize: 13),
                     ),
-                    onPressed: () {
-                      Navigator.pushNamed(context, "/tagDetail",
-                          arguments: "幽默");
+                    onPressed: () async {
+                      Response resp =
+                          await dio.get("/boil/list/tag/${boilVo['tagId']}");
+                      List tagBoilList = resp.data["data"];
+                      Navigator.pushNamed(context, "/tagDetail", arguments: {
+                        "title": boilVo["tagTitle"],
+                        "id": boilVo["tagId"],
+                        "boilList": tagBoilList
+                      });
                     },
                     borderSide: new BorderSide(color: Colors.blue),
                   ),

@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:boil/model/user.dart';
 import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -16,50 +14,33 @@ class UserPage extends StatefulWidget {
 
 class _UserPageState extends State<UserPage> {
   bool isLogin = false;
-  UserInfo userInfo = UserInfo();
   @override
   void initState() {
     super.initState();
-    InitLoginState();
-  }
-
-  void InitLoginState() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      isLogin = prefs.getBool("isLogin");
-      if (isLogin) {
-        Map<String, dynamic> userMap = jsonDecode(prefs.getString("userInfo"));
-        userInfo.ID = userMap["id"];
-        userInfo.UserName = userMap["username"];
-        userInfo.AvatarId = userMap["avatarId"];
-        userInfo.Bio = userMap["bio"];
-      }
+      isLogin = GlobalState["isLogin"];
     });
   }
 
-  List<Widget> unLoginComponents = [
-    SizedBox(height: 100),
-    Center(
-      child: Container(
-        width: 80,
-        height: 80,
-        child: new CircleAvatar(
-          backgroundColor: Colors.lightBlue,
-          child: Text(
-            "可爱的头像",
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ),
-    ),
-    Padding(
-      child: Card(
-        child: LoginComponent(),
-      ),
-      padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-    )
-  ];
+  @override
+  Widget build(BuildContext context) {
+    return isLogin ? IsLoginComponent() : UnLoginComponent();
+  }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+}
+
+class IsLoginComponent extends StatefulWidget {
+  IsLoginComponent({Key key}) : super(key: key);
+
+  @override
+  _IsLoginComponentState createState() => _IsLoginComponentState();
+}
+
+class _IsLoginComponentState extends State<IsLoginComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -76,8 +57,8 @@ class _UserPageState extends State<UserPage> {
                 child: Align(
                   child: CircleAvatar(
                     backgroundColor: Colors.white,
-                    backgroundImage:
-                        NetworkImage("https://blog.icepan.cloud/avatar.jpg"),
+                    backgroundImage: NetworkImage(
+                        "https://blog.icepan.cloud/${GlobalState["userInfo"]["avatarId"]}.jpg"),
                     radius: 60,
                   ),
                 ),
@@ -87,7 +68,7 @@ class _UserPageState extends State<UserPage> {
           SizedBox(height: 10),
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-            child: Text(this.userInfo.Bio),
+            child: Text(GlobalState["userInfo"]["bio"]),
           ),
           SizedBox(height: 10),
           ListTile(
@@ -124,21 +105,57 @@ class _UserPageState extends State<UserPage> {
             child: RaisedButton(
               child: Text("退出"),
               onPressed: () async {
+                GlobalState["isLogin"] = false;
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 prefs.setBool("isLogin", false);
-                Navigator.pop(context);
-                Navigator.pushNamed(context, "/user");
+                Navigator.pushNamedAndRemoveUntil(
+                    context, "/user", (route) => route == null);
               },
             ),
           ),
         ],
       ),
     );
+    ;
   }
+}
+
+class UnLoginComponent extends StatefulWidget {
+  UnLoginComponent({Key key}) : super(key: key);
 
   @override
-  void dispose() {
-    super.dispose();
+  _UnLoginComponentState createState() => _UnLoginComponentState();
+}
+
+class _UnLoginComponentState extends State<UnLoginComponent> {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          SizedBox(height: 100),
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              child: new CircleAvatar(
+                backgroundColor: Colors.lightBlue,
+                child: Text(
+                  "可爱的头像",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            child: Card(
+              child: LoginComponent(),
+            ),
+            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+          )
+        ],
+      ),
+    );
   }
 }
 
@@ -205,17 +222,23 @@ class _LoginComponentState extends State<LoginComponent> {
                         data: {"username": username, "password": password},
                       );
                       LoadingDialog.hide(context);
+                      GlobalState["isLogin"] = true;
+                      GlobalState["userInfo"] = resp.data["data"];
+                      GlobalState["userToken"] = resp.data["token"];
                       prefs.setBool("isLogin", true);
                       prefs.setString(
-                          "userInfo", jsonEncode(resp.data["data"]));
+                          "userInfo", jsonEncode(GlobalState["userInfo"]));
                       prefs.setString("userToken", resp.data["token"]);
-                      Navigator.pop(context);
-                      Navigator.pushNamed(context, "/user");
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, "/user", (route) => route == null);
                     } catch (e) {
                       LoadingDialog.hide(context);
                       prefs.setBool("isLogin", false);
                       prefs.remove("userInfo");
                       prefs.remove("userToken");
+                      GlobalState["isLogin"] = false;
+                      GlobalState["userInfo"] = "";
+                      GlobalState["userToken"] = "";
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
