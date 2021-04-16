@@ -1,71 +1,50 @@
+import 'package:boil/network.dart';
+import 'package:boil/pages/boil/boil_bottom.dart';
+import 'package:boil/pages/boil/comment_item.dart';
+import 'package:boil/pages/user/user_info.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import '../network.dart';
-
-class HomePage extends StatefulWidget {
-  HomePage({Key key}) : super(key: key);
+class BoilDetailPage extends StatefulWidget {
+  Map boilVo;
+  BoilDetailPage(this.boilVo, {Key key}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _BoilDetailPageState createState() => _BoilDetailPageState(this.boilVo);
 }
 
-class _HomePageState extends State<HomePage> {
-  List boilList = [];
+class _BoilDetailPageState extends State<BoilDetailPage> {
+  List comments = [];
+  Map boilVo;
+  _BoilDetailPageState(this.boilVo);
+
   @override
   void initState() {
     super.initState();
-    InitBoil();
+    InitCommentList();
   }
 
-  void InitBoil() async {
-    Response resp = await dio.get("/boil/all");
+  void InitCommentList() async {
+    Response resp = await dio.get("/comment/list/${boilVo['id']}");
     setState(() {
-      this.boilList = resp.data["data"];
+      this.comments = resp.data["data"];
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.amber[50],
-      child: RefreshIndicator(
-        onRefresh: () async {
-          InitBoil();
-          return Future.value(true);
-        },
-        child: ListView.builder(
-          itemCount: this.boilList.length,
-          itemBuilder: (context, index) {
-            return InkWell(
-              child: BoilItem(this.boilList[index]),
-              onTap: () {
-                Navigator.pushNamed(context, "/boil/detail",
-                    arguments: this.boilList[index]);
-              },
-            );
-          },
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("沸点详情"),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.refresh_rounded),
+              onPressed: () {
+                InitCommentList();
+              })
+        ],
       ),
-    );
-  }
-}
-
-List<Widget> boilBottom = [
-  LikeBoil(title: "点赞", iconData: Icons.star),
-  LikeBoil(title: "评论", iconData: Icons.app_registration),
-  LikeBoil(title: "转发", iconData: Icons.adjust_sharp),
-];
-
-class BoilItem extends StatelessWidget {
-  Map boilVo;
-  BoilItem(this.boilVo, {Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-      child: Card(
+      body: Container(
         child: Column(
           children: [
             InkWell(
@@ -100,10 +79,18 @@ class BoilItem extends StatelessWidget {
                 ),
               ),
               onTap: () {
-                showDialog(
-                    context: context,
-                    builder: (context) =>
-                        AlertDialog(title: Text(boilVo["username"])));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoPage(
+                      {
+                        "userId": boilVo["userId"],
+                        "userAvatarId": boilVo["userAvatarId"],
+                        "userBio": boilVo["userBio"]
+                      },
+                    ),
+                  ),
+                );
               },
             ),
             Container(
@@ -112,7 +99,7 @@ class BoilItem extends StatelessWidget {
               alignment: Alignment.topLeft,
               child: Text(
                 boilVo["content"],
-                style: TextStyle(fontSize: 15.0),
+                style: TextStyle(fontSize: 20.0),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -148,52 +135,21 @@ class BoilItem extends StatelessWidget {
               ],
             ),
             Row(
-              children: boilBottom,
+              children: [
+                LikeBoil(title: "喜欢", iconData: Icons.star_outline_rounded),
+                CommentBoil(boilVo["id"]),
+                LikeBoil(title: "转发", iconData: Icons.adjust_sharp),
+              ],
+            ),
+            Divider(),
+            Column(
+              children: this
+                  .comments
+                  .map((commentVo) => CommentItem(commentVo))
+                  .toList(),
             )
           ],
         ),
-      ),
-    );
-  }
-}
-
-class LikeBoil extends StatefulWidget {
-  String title;
-  IconData iconData;
-  LikeBoil({Key key, this.title, this.iconData}) : super(key: key);
-
-  @override
-  _LikeBoilState createState() =>
-      _LikeBoilState(title: this.title, iconData: this.iconData);
-}
-
-class _LikeBoilState extends State<LikeBoil> {
-  String title;
-  IconData iconData;
-  bool flag = false;
-  _LikeBoilState({this.title, this.iconData});
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        child: Container(
-          height: 50.0,
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(this.iconData,
-                  color:
-                      this.flag == true ? Colors.green[300] : Colors.grey[300]),
-              Text(this.title),
-            ],
-          ),
-        ),
-        onTap: () {
-          setState(() {
-            this.flag = !this.flag;
-          });
-        },
       ),
     );
   }

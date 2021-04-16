@@ -2,41 +2,6 @@ import 'package:boil/network.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-import 'home.dart';
-
-class TagDetailPage extends StatelessWidget {
-  const TagDetailPage({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    Map args = ModalRoute.of(context).settings.arguments;
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("标签# " + args["title"]),
-      ),
-      body: Container(
-        color: Colors.amber[50],
-        child: RefreshIndicator(
-          onRefresh: () async {
-            return Future.value(true);
-          },
-          child: ListView.builder(
-            itemCount: args["boilList"].length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                child: BoilItem(args["boilList"][index]),
-                onTap: () {
-                  Navigator.pushNamed(context, "/boil/detail");
-                },
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class TagsPage extends StatefulWidget {
   TagsPage({Key key}) : super(key: key);
 

@@ -1,8 +1,12 @@
+import 'dart:convert';
+
+import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
-import 'pages/home.dart';
-import 'pages/search.dart';
-import 'pages/tags.dart';
-import 'pages/user.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/home/home.dart';
+import 'pages/search/search.dart';
+import 'pages/tags/tags.dart';
+import 'pages/user/user.dart';
 
 class Tabs extends StatefulWidget {
   int currentIndex;
@@ -25,6 +29,17 @@ class _TabsState extends State<Tabs> {
   void initState() {
     print("tabs------------------");
     super.initState();
+    InitGlobalState();
+  }
+
+  void InitGlobalState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    GlobalState["isLogin"] =
+        prefs.getBool("isLogin") != null ? prefs.getBool("isLogin") : false;
+    if (GlobalState["isLogin"]) {
+      GlobalState["userInfo"] = jsonDecode(prefs.getString("userInfo"));
+      GlobalState["token"] = prefs.getString("token");
+    }
   }
 
   @override
@@ -32,7 +47,7 @@ class _TabsState extends State<Tabs> {
     return Container(
       child: Scaffold(
         floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.bolt),
+          child: Icon(Icons.edit),
           onPressed: () {
             Navigator.pushNamed(context, "/write");
           },
@@ -46,7 +61,16 @@ class _TabsState extends State<Tabs> {
               onPressed: () {
                 showSearch(context: context, delegate: searchBarDelegate());
               },
-            )
+            ),
+            IconButton(
+                icon: Icon(Icons.notifications_active_outlined),
+                onPressed: () {
+                  if (!GlobalState["isLogin"]) {
+                    Navigator.pushNamed(context, "/user");
+                    return;
+                  }
+                  Navigator.pushNamed(context, "/user/message");
+                })
           ],
         ),
         body: this.pages[this.currentIndex],
@@ -64,6 +88,12 @@ class _TabsState extends State<Tabs> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    print("--------tab down------");
+    super.dispose();
   }
 }
 
