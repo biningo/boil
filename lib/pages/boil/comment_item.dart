@@ -1,11 +1,11 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/user/user_info.dart';
 import 'package:boil/utils.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class CommentItem extends StatelessWidget {
   Map commentVo;
+
   CommentItem(this.commentVo, {Key key}) : super(key: key);
 
   @override
@@ -92,11 +92,7 @@ class CommentItem extends StatelessWidget {
                     );
                   });
               if (i == 1) {
-                Response resp = await dio.delete("/comment/${commentVo['id']}");
-                showDialog(
-                    context: context,
-                    builder: (context) =>
-                        AlertDialog(title: Text(resp.data["msg"])));
+                await dio.delete("/comment/${commentVo['id']}");
               }
             },
             child: Container(

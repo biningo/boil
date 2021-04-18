@@ -1,14 +1,14 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/boil/boil_bottom.dart';
-import 'package:boil/pages/boil/comment_item.dart';
+import 'package:boil/pages/boil/boil_bottom_comment.dart';
 import 'package:boil/pages/user/user_info.dart';
+import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class BoilDetailPage extends StatefulWidget {
   Map boilVo;
   BoilDetailPage(this.boilVo, {Key key}) : super(key: key);
-
   @override
   _BoilDetailPageState createState() => _BoilDetailPageState(this.boilVo);
 }
@@ -28,6 +28,7 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
     Response resp = await dio.get("/comment/list/${boilVo['id']}");
     setState(() {
       this.comments = resp.data["data"];
+      boilVo['commentCount'] = this.comments.length;
     });
   }
 
@@ -36,13 +37,6 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("沸点详情"),
-        actions: [
-          IconButton(
-              icon: Icon(Icons.refresh_rounded),
-              onPressed: () {
-                InitCommentList();
-              })
-        ],
       ),
       body: Container(
         child: Column(
@@ -136,18 +130,156 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
             ),
             Row(
               children: [
-                LikeBoil(title: "喜欢", iconData: Icons.star_outline_rounded),
-                CommentBoil(boilVo["id"]),
-                LikeBoil(title: "转发", iconData: Icons.adjust_sharp),
+                BoilBottom(title: "喜欢", iconData: Icons.star_outline_rounded),
+                BoilCommentBottom(boilVo, InitCommentList),
+                BoilBottom(title: "转发", iconData: Icons.adjust_sharp),
               ],
             ),
             Divider(),
-            Column(
-              children: this
-                  .comments
-                  .map((commentVo) => CommentItem(commentVo))
-                  .toList(),
-            )
+            Expanded(
+              child: RefreshIndicator(
+                child: ListView(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  children: this
+                      .comments
+                      .map(
+                        (commentVo) => Container(
+                          child: Column(
+                            children: [
+                              Divider(),
+                              InkWell(
+                                child: ListTile(
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.white,
+                                    backgroundImage: NetworkImage(
+                                        "https://blog.icepan.cloud/${commentVo["userAvatarId"]}.jpg"),
+                                    radius: 20,
+                                  ),
+                                  title: Row(
+                                    children: [
+                                      Text(
+                                        "网名:${commentVo['username']}",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12.0,
+                                        ),
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        commentVo["createTime"],
+                                        style: TextStyle(
+                                          fontSize: 10.0,
+                                          fontWeight: FontWeight.w100,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  subtitle: Text(
+                                    commentVo["userBio"],
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => UserInfoPage(
+                                        {
+                                          "userId": commentVo["userId"],
+                                          "userAvatarId":
+                                              commentVo["userAvatarId"],
+                                          "userBio": commentVo["userBio"]
+                                        },
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              InkWell(
+                                onLongPress: () async {
+                                  List<Widget> options = [];
+                                  if (GlobalState["isLogin"] == true &&
+                                      GlobalState["userInfo"]["id"] ==
+                                          commentVo["userId"]) {
+                                    options.add(SimpleDialogOption(
+                                      onPressed: () {
+                                        // 返回id
+                                        Navigator.pop(context, 1);
+                                      },
+                                      child: Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 6),
+                                        child: Text("删除",
+                                            style: TextStyle(
+                                              fontSize: 20.0,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.red,
+                                            )),
+                                      ),
+                                    ));
+                                  }
+                                  int i = await showDialog<int>(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return SimpleDialog(
+                                          children: options,
+                                        );
+                                      });
+                                  if (i == 1) {
+                                    await dio
+                                        .delete("/comment/${commentVo['id']}");
+                                    InitCommentList();
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.fromLTRB(
+                                      40, 0, 0, 0), //left top right bottom
+                                  alignment: Alignment.topLeft,
+                                  child: Text(
+                                    commentVo["content"],
+                                    style: TextStyle(fontSize: 15.0),
+                                    maxLines: 4,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+                onRefresh: () async {
+                  InitCommentList();
+                  return Future.value(true);
+                },
+              ),
+            ),
+            SizedBox(
+                width: 500,
+                height: 60,
+                child: OutlineButton(
+                  child: Wrap(
+                    children: [
+                      Icon(Icons.edit, color: Colors.blue),
+                      Text("写评论",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ))
+                    ],
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, "/comment/edit",
+                            arguments: boilVo['id'])
+                        .then((value) {
+                      InitCommentList();
+                    });
+                  },
+                ))
           ],
         ),
       ),

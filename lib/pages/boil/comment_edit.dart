@@ -1,4 +1,5 @@
 import 'package:boil/network.dart';
+import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
 
 class CommentEditPage extends StatefulWidget {
@@ -39,9 +40,20 @@ class _CommentEditPageState extends State<CommentEditPage> {
               ),
             ),
             onPressed: () async {
-              dio.post("/comment/publish/${this.boilId}",
-                  data: {"content": this.content});
-              Navigator.pop(context);
+              if (!GlobalState["isLogin"]) {
+                Navigator.pushNamedAndRemoveUntil(
+                    context, "/user", (route) => route == null);
+                return;
+              }
+              if (this.content == null) {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(title: Text("内容不能为空")));
+              } else {
+                await dio.post("/comment/publish/${this.boilId}",
+                    data: {"content": this.content});
+                Navigator.pop(context);
+              }
             },
           )
         ],

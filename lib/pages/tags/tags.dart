@@ -1,4 +1,5 @@
 import 'package:boil/network.dart';
+import 'package:boil/pages/boil/boil_list.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -41,11 +42,12 @@ class _TagsPageState extends State<TagsPage> {
             onPressed: () async {
               Response resp = await dio.get("/boil/list/tag/${val['id']}");
               List tagBoilList = resp.data["data"];
-              Navigator.pushNamed(context, "/tagDetail", arguments: {
-                "title": val["title"],
-                "id": val["id"],
-                "boilList": tagBoilList
-              });
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BoilListPage(tagBoilList),
+                ),
+              );
             },
             pressElevation: 20,
           ),

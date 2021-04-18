@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:boil/network.dart';
 import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserEditPage extends StatefulWidget {
   UserEditPage({Key key}) : super(key: key);
@@ -26,7 +29,7 @@ class _UserEditPageState extends State<UserEditPage> {
         leading: IconButton(
           icon: Icon(Icons.keyboard_return, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context, this.content);
           },
         ),
         actions: <Widget>[
@@ -39,36 +42,37 @@ class _UserEditPageState extends State<UserEditPage> {
               ),
             ),
             onPressed: () async {
-              dio.post(
+              await dio.post(
                 "/user/update/bio/${GlobalState['userInfo']['id']}",
                 data: {"bio": this.content},
               );
               GlobalState["userInfo"]["bio"] = this.content;
-              Navigator.pop(context);
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.setString("userInfo", jsonEncode(GlobalState['userInfo']));
+              Navigator.pop(context, this.content);
             },
           )
         ],
       ),
       body: Container(
-          padding: EdgeInsets.all(10),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                autofocus: true,
-                controller: TextEditingController.fromValue(
-                    TextEditingValue(text: this.content)),
-                style: TextStyle(fontSize: 20.0),
-                maxLines: 10,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                ),
-                onChanged: (val) {
-                  this.content = val;
-                },
-              ),
-            ],
-          )),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            autofocus: true,
+            controller: TextEditingController.fromValue(
+                TextEditingValue(text: this.content)),
+            style: TextStyle(fontSize: 20.0),
+            maxLines: 2,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+            ),
+            onChanged: (val) {
+              this.content = val;
+            },
+          ),
+        ],
+      )),
     );
   }
 }

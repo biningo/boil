@@ -10,13 +10,9 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserPageState extends State<UserPage> {
-  bool isLogin = false;
-  @override
-  void initState() {
-    super.initState();
-    setState(() {
-      isLogin = GlobalState["isLogin"];
-    });
+  bool isLogin;
+  _UserPageState() {
+    isLogin = GlobalState["isLogin"];
   }
 
   @override
