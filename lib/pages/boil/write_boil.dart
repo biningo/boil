@@ -79,7 +79,7 @@ class _WriteBoilPageState extends State<WriteBoilPage> {
                     context: context,
                     builder: (context) => AlertDialog(title: Text("信息不正确")));
               } else {
-                await dio.post("/boil/publish", data: {
+                await dio.post("/boils/publish", data: {
                   "content": this.content,
                   "tagId": this.tagId,
                   "userId": GlobalState["userInfo"]["id"]

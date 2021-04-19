@@ -1,17 +1,20 @@
+import 'package:boil/network.dart';
+import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
 
 class BoilLikeBottom extends StatefulWidget {
-  int boilId;
-  BoilLikeBottom(this.boilId, {Key key}) : super(key: key);
+  Map boilVo;
+  BoilLikeBottom(this.boilVo, {Key key}) : super(key: key);
 
   @override
-  _BoilLikeBottomState createState() => _BoilLikeBottomState(this.boilId);
+  _BoilLikeBottomState createState() => _BoilLikeBottomState();
 }
 
 class _BoilLikeBottomState extends State<BoilLikeBottom> {
-  int boilId;
-  bool flag = false;
-  _BoilLikeBottomState(this.boilId);
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,19 +26,41 @@ class _BoilLikeBottomState extends State<BoilLikeBottom> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(this.flag ? Icons.star_rounded : Icons.star_outline_rounded,
-                  color: this.flag ? Colors.red : Colors.grey[400]),
+              Icon(
+                  widget.boilVo['isLike']
+                      ? Icons.star_rounded
+                      : Icons.star_outline_rounded,
+                  color:
+                      widget.boilVo['isLike'] ? Colors.red : Colors.grey[400]),
               Text(
-                "喜欢",
-                style: TextStyle(color: this.flag ? Colors.red : Colors.black),
+                "喜欢(${widget.boilVo['likeCount']})",
+                style: TextStyle(
+                    color: widget.boilVo['isLike'] ? Colors.red : Colors.black),
               ),
             ],
           ),
         ),
-        onTap: () {
+        onTap: () async {
+          if (!GlobalState['isLogin']) {
+            Navigator.popAndPushNamed(context, "/user");
+            return;
+          }
           setState(() {
-            this.flag = !this.flag;
+            widget.boilVo['isLike'] = !widget.boilVo['isLike'];
           });
+          if (widget.boilVo['isLike']) {
+            await dio.get(
+                "/boils/user/${GlobalState['userInfo']['id']}/like/${widget.boilVo['id']}");
+            setState(() {
+              widget.boilVo['likeCount']++;
+            });
+          } else {
+            await dio.get(
+                "/boils/user/${GlobalState['userInfo']['id']}/unlike/${widget.boilVo['id']}");
+            setState(() {
+              widget.boilVo['likeCount']--;
+            });
+          }
         },
       ),
     );

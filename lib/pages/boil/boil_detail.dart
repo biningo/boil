@@ -1,6 +1,8 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/boil/boil_bottom.dart';
 import 'package:boil/pages/boil/boil_bottom_comment.dart';
+import 'package:boil/pages/boil/boil_bottom_like.dart';
+import 'package:boil/pages/boil/boil_user_component.dart';
 import 'package:boil/pages/user/user_info.dart';
 import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
@@ -10,14 +12,11 @@ class BoilDetailPage extends StatefulWidget {
   Map boilVo;
   BoilDetailPage(this.boilVo, {Key key}) : super(key: key);
   @override
-  _BoilDetailPageState createState() => _BoilDetailPageState(this.boilVo);
+  _BoilDetailPageState createState() => _BoilDetailPageState();
 }
 
 class _BoilDetailPageState extends State<BoilDetailPage> {
   List comments = [];
-  Map boilVo;
-  _BoilDetailPageState(this.boilVo);
-
   @override
   void initState() {
     super.initState();
@@ -25,10 +24,10 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
   }
 
   void InitCommentList() async {
-    Response resp = await dio.get("/comment/list/${boilVo['id']}");
+    Response resp = await dio.get("/comment/list/${widget.boilVo['id']}");
     setState(() {
       this.comments = resp.data["data"];
-      boilVo['commentCount'] = this.comments.length;
+      widget.boilVo['commentCount'] = this.comments.length;
     });
   }
 
@@ -41,58 +40,13 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
       body: Container(
         child: Column(
           children: [
-            InkWell(
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage: NetworkImage(
-                      "https://blog.icepan.cloud/${boilVo["userAvatarId"]}.jpg"),
-                  radius: 30,
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      "网名:${boilVo['username']}",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 10),
-                    Text(
-                      boilVo["createTime"],
-                      style: TextStyle(
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.w100,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
-                ),
-                subtitle: Text(
-                  boilVo["userBio"],
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UserInfoPage(
-                      {
-                        "userId": boilVo["userId"],
-                        "userAvatarId": boilVo["userAvatarId"],
-                        "userBio": boilVo["userBio"]
-                      },
-                    ),
-                  ),
-                );
-              },
-            ),
+            BoilUserComponent(widget.boilVo),
             Container(
               padding:
                   EdgeInsets.fromLTRB(10, 5, 10, 10), //left top right bottom
               alignment: Alignment.topLeft,
               child: Text(
-                boilVo["content"],
+                widget.boilVo["content"],
                 style: TextStyle(fontSize: 20.0),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
@@ -107,19 +61,19 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20.0)),
                     label: Text(
-                      boilVo["tagTitle"],
+                      widget.boilVo["tagTitle"],
                       style: TextStyle(
                           color: Colors.blue[300],
                           fontWeight: FontWeight.bold,
                           fontSize: 13),
                     ),
                     onPressed: () async {
-                      Response resp =
-                          await dio.get("/boil/list/tag/${boilVo['tagId']}");
+                      Response resp = await dio
+                          .get("/boil/list/tag/${widget.boilVo['tagId']}");
                       List tagBoilList = resp.data["data"];
                       Navigator.pushNamed(context, "/tagDetail", arguments: {
-                        "title": boilVo["tagTitle"],
-                        "id": boilVo["tagId"],
+                        "title": widget.boilVo["tagTitle"],
+                        "id": widget.boilVo["tagId"],
                         "boilList": tagBoilList
                       });
                     },
@@ -128,11 +82,19 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
                 ),
               ],
             ),
+            //Bottom
             Row(
               children: [
-                BoilBottom(title: "喜欢", iconData: Icons.star_outline_rounded),
-                BoilCommentBottom(boilVo, InitCommentList),
-                BoilBottom(title: "转发", iconData: Icons.adjust_sharp),
+                BoilLikeBottom(widget.boilVo),
+                BoilCommentBottom(widget.boilVo, InitCommentList),
+                BoilBottom(Text("转发"), Icon(Icons.adjust_sharp), handler: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text("敬请期待"),
+                    ),
+                  );
+                }),
               ],
             ),
             Divider(),
@@ -274,7 +236,7 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
                   ),
                   onPressed: () {
                     Navigator.pushNamed(context, "/comment/edit",
-                            arguments: boilVo['id'])
+                            arguments: widget.boilVo['id'])
                         .then((value) {
                       InitCommentList();
                     });

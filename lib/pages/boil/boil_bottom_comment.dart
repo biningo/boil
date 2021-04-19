@@ -7,15 +7,10 @@ class BoilCommentBottom extends StatefulWidget {
       : super(key: key);
 
   @override
-  _BoilCommentBottomState createState() =>
-      _BoilCommentBottomState(this.boilVo, this.initCommentList);
+  _BoilCommentBottomState createState() => _BoilCommentBottomState();
 }
 
 class _BoilCommentBottomState extends State<BoilCommentBottom> {
-  Map boilVo;
-  Function initCommentList;
-  _BoilCommentBottomState(this.boilVo, this.initCommentList);
-
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -27,14 +22,14 @@ class _BoilCommentBottomState extends State<BoilCommentBottom> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.app_registration, color: Colors.grey[400]),
-              Text("评论(${boilVo['commentCount']})"),
+              Text("评论(${widget.boilVo['commentCount']})"),
             ],
           ),
         ),
         onTap: () {
           Navigator.pushNamed(context, "/comment/edit",
-                  arguments: this.boilVo['id'])
-              .then((value) => initCommentList());
+                  arguments: widget.boilVo['id'])
+              .then((value) => widget.initCommentList());
         },
       ),
     );

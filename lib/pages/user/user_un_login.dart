@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:boil/network.dart';
 import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UnLoginComponent extends StatefulWidget {

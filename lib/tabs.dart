@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:boil/pages/follow/follow.dart';
 import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,10 +19,11 @@ class Tabs extends StatefulWidget {
 class _TabsState extends State<Tabs> {
   int currentIndex;
   _TabsState({this.currentIndex = 0});
-  List<Widget> pages = [HomePage(), TagsPage(), UserPage()];
+  List<Widget> pages = [HomePage(), TagsPage(), FollowPage(), UserPage()];
   List<BottomNavigationBarItem> bottomItems = [
     BottomBarItem("沸点", Icons.adjust_sharp),
     BottomBarItem("标签", Icons.tag),
+    BottomBarItem("关注", Icons.face),
     BottomBarItem("我的", Icons.account_circle_outlined),
   ];
 

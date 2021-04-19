@@ -31,31 +31,30 @@ class _TagsPageState extends State<TagsPage> {
     List<Widget> tagChips = this
         .tags
         .map(
-          (val) => RawChip(
+          (tagVo) => RawChip(
             avatar: Icon(Icons.tag),
             label: Text(
-              val['title'],
+              tagVo['title'] + "(${tagVo['boilCount']})",
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 20.0),
+              style: TextStyle(fontSize: 15.0),
             ),
-            elevation: 10,
+            elevation: 8,
             onPressed: () async {
-              Response resp = await dio.get("/boil/list/tag/${val['id']}");
-              List tagBoilList = resp.data["data"];
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BoilListPage(tagBoilList),
+                  builder: (context) => BoilListPage(
+                      tagVo['title'], "/boils/list/tag/${tagVo['id']}"),
                 ),
               );
             },
-            pressElevation: 20,
+            pressElevation: 10,
           ),
         )
         .toList();
     return Container(
       alignment: Alignment.center,
-      padding: EdgeInsets.all(10.0),
+      padding: EdgeInsets.all(5.0),
       child: GridView(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3, //横轴三个子widget

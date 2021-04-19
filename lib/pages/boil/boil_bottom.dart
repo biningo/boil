@@ -1,13 +1,11 @@
-import 'package:boil/pages/boil/boil_detail.dart';
 import 'package:flutter/material.dart';
 
 class BoilBottom extends StatelessWidget {
-  String title;
-  IconData iconData;
+  Text text;
+  Icon icon;
   Map boilVo;
-  bool flag = false;
-
-  BoilBottom({this.boilVo, this.title, this.iconData});
+  Function handler;
+  BoilBottom(this.text, this.icon, {this.boilVo, this.handler});
   @override
   Widget build(BuildContext context) {
     return Expanded(
@@ -18,28 +16,13 @@ class BoilBottom extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(this.iconData,
-                  color: this.flag ? Colors.green : Colors.grey[400]),
-              Text(this.title),
+              icon,
+              text,
             ],
           ),
         ),
         onTap: () {
-          if (this.title == "评论") {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BoilDetailPage(boilVo),
-              ),
-            );
-          } else if (this.title == "喜欢") {
-          } else {
-            showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                      title: Text("敬请期待"),
-                    ));
-          }
+          handler();
         },
       ),
     );

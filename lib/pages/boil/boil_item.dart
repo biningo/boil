@@ -1,17 +1,23 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/boil/boil_bottom.dart';
-import 'package:boil/pages/boil/boil_bottom_like.dart';
 import 'package:boil/pages/boil/boil_detail.dart';
 import 'package:boil/pages/boil/boil_list.dart';
+import 'package:boil/pages/boil/boil_user_component.dart';
 import 'package:boil/pages/user/user_info.dart';
 import 'package:boil/utils.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-class BoilItem extends StatelessWidget {
+class BoilItem extends StatefulWidget {
   Map boilVo;
-  final Function initBoil;
-  BoilItem(this.boilVo, this.initBoil);
+  final Function initBoilList;
+  BoilItem(this.boilVo, this.initBoilList, {Key key}) : super(key: key);
+
+  @override
+  _BoilItemState createState() => _BoilItemState();
+}
+
+class _BoilItemState extends State<BoilItem> {
+  _BoilItemState();
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +38,7 @@ class BoilItem extends StatelessWidget {
           )
         ];
         if (GlobalState["isLogin"] == true &&
-            GlobalState["userInfo"]["id"] == boilVo["userId"]) {
+            GlobalState["userInfo"]["id"] == widget.boilVo["userId"]) {
           options.add(SimpleDialogOption(
             onPressed: () {
               // 返回id
@@ -57,82 +63,37 @@ class BoilItem extends StatelessWidget {
               );
             });
         if (i == 1) {
-          await dio.delete("/boil/${boilVo['id']}");
-          initBoil();
+          await dio.delete("/boils/${widget.boilVo['id']}");
+          widget.initBoilList();
         } else if (i == 2) {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => BoilDetailPage(boilVo),
+              builder: (context) => BoilDetailPage(widget.boilVo),
             ),
-          );
+          ).then((value) => widget.initBoilList());
         }
       },
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BoilDetailPage(boilVo),
+            builder: (context) => BoilDetailPage(widget.boilVo),
           ),
-        );
+        ).then((value) => widget.initBoilList());
       },
       child: Container(
         margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
         child: Card(
           child: Column(
             children: [
-              InkWell(
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    backgroundImage: NetworkImage(
-                        "https://blog.icepan.cloud/${boilVo["userAvatarId"]}.jpg"),
-                    radius: 30,
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        "网名:${boilVo['username']}",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        boilVo["createTime"],
-                        style: TextStyle(
-                          fontSize: 10.0,
-                          fontWeight: FontWeight.w100,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  subtitle: Text(
-                    boilVo["userBio"],
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserInfoPage(
-                        {
-                          "userId": boilVo["userId"],
-                          "userAvatarId": boilVo["userAvatarId"],
-                          "userBio": boilVo["userBio"]
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
+              BoilUserComponent(widget.boilVo),
               Container(
                 padding:
                     EdgeInsets.fromLTRB(10, 5, 10, 10), //left top right bottom
                 alignment: Alignment.topLeft,
                 child: Text(
-                  boilVo["content"],
+                  widget.boilVo["content"],
                   style: TextStyle(fontSize: 15.0),
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
@@ -147,22 +108,21 @@ class BoilItem extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20.0)),
                       label: Text(
-                        boilVo["tagTitle"],
+                        widget.boilVo["tagTitle"],
                         style: TextStyle(
                             color: Colors.blue[300],
                             fontWeight: FontWeight.bold,
                             fontSize: 13),
                       ),
                       onPressed: () async {
-                        Response resp =
-                            await dio.get("/boil/list/tag/${boilVo['tagId']}");
-                        List tagBoilList = resp.data["data"];
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BoilListPage(tagBoilList),
+                            builder: (context) => BoilListPage(
+                                widget.boilVo['tagTitle'],
+                                "/boils/list/tag/${widget.boilVo['tagId']}"),
                           ),
-                        );
+                        ).then((value) => widget.initBoilList());
                       },
                       borderSide: new BorderSide(color: Colors.blue),
                     ),
@@ -171,13 +131,70 @@ class BoilItem extends StatelessWidget {
               ),
               Row(
                 children: [
-                  BoilLikeBottom(boilVo['id']),
                   BoilBottom(
-                    title: "评论(${boilVo['commentCount']})",
-                    iconData: Icons.app_registration,
-                    boilVo: boilVo,
+                    Text(
+                      "喜欢(${widget.boilVo['likeCount']})",
+                      style: TextStyle(
+                          color: widget.boilVo['isLike']
+                              ? Colors.red
+                              : Colors.black),
+                    ),
+                    Icon(
+                        widget.boilVo['isLike']
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
+                        color: widget.boilVo['isLike']
+                            ? Colors.red
+                            : Colors.grey[400]),
+                    boilVo: widget.boilVo,
+                    handler: () async {
+                      if (!GlobalState['isLogin']) {
+                        Navigator.popAndPushNamed(context, "/user");
+                        return;
+                      }
+                      setState(() {
+                        widget.boilVo['isLike'] = !widget.boilVo['isLike'];
+                      });
+                      if (widget.boilVo['isLike']) {
+                        await dio.get(
+                            "/boils/user/${GlobalState['userInfo']['id']}/like/${widget.boilVo['id']}");
+                        setState(() {
+                          widget.boilVo['likeCount']++;
+                        });
+                      } else {
+                        await dio.get(
+                            "/boils/user/${GlobalState['userInfo']['id']}/unlike/${widget.boilVo['id']}");
+                        setState(() {
+                          widget.boilVo['likeCount']--;
+                        });
+                      }
+                    },
                   ),
-                  BoilBottom(title: "转发", iconData: Icons.adjust_sharp),
+                  BoilBottom(
+                    Text("评论(${widget.boilVo['commentCount']})"),
+                    Icon(Icons.app_registration, color: Colors.grey[400]),
+                    boilVo: widget.boilVo,
+                    handler: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BoilDetailPage(widget.boilVo),
+                        ),
+                      ).then((value) => widget.initBoilList());
+                    },
+                  ),
+                  BoilBottom(
+                    Text("转发"),
+                    Icon(Icons.adjust_sharp, color: Colors.grey[400]),
+                    handler: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("敬请期待"),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               )
             ],

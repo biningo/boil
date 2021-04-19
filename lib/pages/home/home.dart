@@ -16,12 +16,11 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    print("---------home--------");
-    InitBoil();
+    InitBoilList();
   }
 
-  void InitBoil() async {
-    Response resp = await dio.get("/boil/all");
+  void InitBoilList() async {
+    Response resp = await dio.get("/boils/list");
     setState(() {
       this.boilList = resp.data["data"];
     });
@@ -32,12 +31,13 @@ class _HomePageState extends State<HomePage> {
     return Container(
       child: RefreshIndicator(
         onRefresh: () async {
-          InitBoil();
+          InitBoilList();
           return Future.value(true);
         },
         child: ListView(
-            children:
-                boilList.map((boilVo) => BoilItem(boilVo, InitBoil)).toList()),
+            children: boilList
+                .map((boilVo) => BoilItem(boilVo, InitBoilList))
+                .toList()),
       ),
     );
   }

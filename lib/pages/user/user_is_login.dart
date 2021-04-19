@@ -1,5 +1,5 @@
 import 'package:boil/network.dart';
-import 'package:boil/pages/user/user_info.dart';
+import 'package:boil/pages/user/user_info_component.dart';
 import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -31,9 +31,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
 
 //转到其它页面
   @override
-  void deactivate() {
-    print("Home------------------deeeeeee");
-  }
+  void deactivate() {}
 
   void InitUserStatus() async {
     Response resp =
@@ -48,7 +46,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
     return Container(
       child: Column(
         children: [
-          UserInfoComponent(this.userMap, userStatus),
+          UserInfoComponent(this.userMap, userStatus, InitUserStatus),
           ListTile(
             leading:
                 Icon(Icons.notifications_active_outlined, color: Colors.blue),
@@ -93,18 +91,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
                         });
               },
             ),
-          ),
-          SizedBox(height: 10.0),
-          SizedBox(
-            height: 50.0,
-            width: 300.0,
-            child: RaisedButton(
-              child: Text("刷新"),
-              onPressed: () async {
-                InitUserStatus();
-              },
-            ),
-          ),
+          )
         ],
       ),
     );
