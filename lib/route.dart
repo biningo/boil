@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 Map<String, WidgetBuilder> routes = {
   "/write": (context) => WriteBoilPage(),
-  "/user": (context) => Tabs(currentIndex: 2),
+  "/user": (context) => Tabs(currentIndex: 3),
   "/home": (context) => Tabs(currentIndex: 0),
   "/user/message": (context) => UserMessagePage(),
   "/user/edit": (context) => UserEditPage(),

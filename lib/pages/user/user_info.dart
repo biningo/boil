@@ -1,67 +1,76 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/user/user_info_component.dart';
+import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 class UserInfoPage extends StatefulWidget {
-  Map boilVo;
-  UserInfoPage(this.boilVo, {Key key}) : super(key: key);
+  int userId;
+  UserInfoPage(this.userId, {Key key}) : super(key: key);
 
   @override
   _UserInfoPageState createState() => _UserInfoPageState();
 }
 
 class _UserInfoPageState extends State<UserInfoPage> {
-  Map userStatus = {"msgCount": 0, "userBoilCount": 0, "likeBoilCount": 0};
+  Map userInfo = {
+    "id": 0,
+    "isFollow": false,
+    "followerCount": 0,
+    "followingCount": 0,
+    "boilCount": 0,
+    "likeBoilCount": 0,
+    "commentBoilCount": 0,
+    "bio": "",
+    "username": "",
+    "avatarId": 0,
+  };
   bool isFollow = false;
+
   @override
   void initState() {
-    print("userinfo....");
     super.initState();
-    InitUserStatus();
+    InitUserInfo();
   }
 
-  void InitUserStatus() async {
-    Response resp = await dio.get("/user/status/${widget.boilVo['userId']}");
+  void InitUserInfo() async {
+    Response resp = await dio.get("/user/info/${widget.userId}");
     setState(() {
-      this.userStatus = resp.data["data"];
+      this.userInfo = resp.data["data"];
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("用户"),
-          actions: [
-            IconButton(
-                icon: Icon(Icons.refresh),
-                onPressed: () {
-                  InitUserStatus();
-                })
-          ],
-        ),
-        body: Column(children: [
-          UserInfoComponent(widget.boilVo, this.userStatus, InitUserStatus),
-          // widget.userMap['isFollow']
-          this.isFollow
-              ? RaisedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      isFollow = !isFollow;
-                    });
-                  },
-                  icon: Icon(Icons.face),
-                  color: Colors.green[100],
-                  label: Text("取消关注"))
-              : RaisedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      isFollow = !isFollow;
-                    });
-                  },
-                  icon: Icon(Icons.add),
-                  label: Text("关注他"))
-        ]));
+      appBar: AppBar(
+        title: Text("用户"),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.refresh),
+              onPressed: () {
+                InitUserInfo();
+              })
+        ],
+      ),
+      body: Column(children: [
+        UserInfoComponent(userInfo),
+        RaisedButton.icon(
+          onPressed: () {
+            if (GlobalState['isLogin'] == false) {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/user", (route) => route == null);
+              return;
+            }
+            setState(() {
+              userInfo['isFollow'] = !userInfo['isFollow'];
+            });
+          },
+          icon: Icon(userInfo['isFollow'] ? Icons.face : Icons.add),
+          color: userInfo['isFollow'] ? Colors.blue[200] : Colors.grey[300],
+          label: Text(userInfo['isFollow'] ? "取消关注" : "关注"),
+        )
+      ]),
+    );
   }
 }

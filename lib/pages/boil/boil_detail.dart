@@ -148,14 +148,8 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => UserInfoPage(
-                                        {
-                                          "userId": commentVo["userId"],
-                                          "userAvatarId":
-                                              commentVo["userAvatarId"],
-                                          "userBio": commentVo["userBio"]
-                                        },
-                                      ),
+                                      builder: (context) =>
+                                          UserInfoPage(widget.boilVo['userId']),
                                     ),
                                   );
                                 },

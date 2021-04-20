@@ -1,13 +1,10 @@
 import 'package:boil/pages/boil/boil_list.dart';
+import 'package:boil/pages/follow/follow_user_list.dart';
 import 'package:flutter/material.dart';
 
 class UserInfoComponent extends StatelessWidget {
-  Map userStatus;
-  Map boilVo;
-  Function initUserStatus;
-  UserInfoComponent(this.boilVo, this.userStatus, this.initUserStatus,
-      {Key key})
-      : super(key: key);
+  Map userInfo;
+  UserInfoComponent(this.userInfo, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +23,7 @@ class UserInfoComponent extends StatelessWidget {
                   child: CircleAvatar(
                     backgroundColor: Colors.white,
                     backgroundImage: NetworkImage(
-                        "https://blog.icepan.cloud/${boilVo['userAvatarId']}.jpg"),
+                        "https://blog.icepan.cloud/${userInfo['avatarId']}.jpg"),
                     radius: 60,
                   ),
                 ),
@@ -36,7 +33,7 @@ class UserInfoComponent extends StatelessWidget {
           SizedBox(height: 10),
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-            child: Text(boilVo["userBio"],
+            child: Text(userInfo["bio"],
                 style: TextStyle(fontWeight: FontWeight.bold)),
           ),
           Container(
@@ -44,9 +41,9 @@ class UserInfoComponent extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
             child: Row(
               children: [
-                FollowTextComponent(userStatus["followers"], "关注者"),
+                FollowTitleComponent(100, "关注者", userInfo['id']),
                 SizedBox(width: 10),
-                FollowTextComponent(userStatus["following"], "关注中"),
+                FollowTitleComponent(100, "关注中", userInfo['id']),
               ],
             ),
           ),
@@ -54,15 +51,15 @@ class UserInfoComponent extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.adjust, color: Colors.blue),
             title: Text("动态"),
-            trailing: Chip(label: Text(userStatus["userBoilCount"].toString())),
+            trailing: Chip(label: Text(userInfo["boilCount"].toString())),
             onTap: () async {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => BoilListPage(
-                      "动态", "/boils/list/user/${boilVo['userId']}"),
+                  builder: (context) =>
+                      BoilListPage("动态", "/boils/list/user/${userInfo['id']}"),
                 ),
-              ).then((value) => initUserStatus());
+              );
             },
           ),
           Divider(),
@@ -74,11 +71,11 @@ class UserInfoComponent extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => BoilListPage(
-                      "喜欢过的", "/boils/list/user/${boilVo['userId']}/like"),
+                      "喜欢过的", "/boils/list/user/${userInfo['id']}/like"),
                 ),
-              ).then((value) => initUserStatus());
+              );
             },
-            trailing: Chip(label: Text(userStatus["likeBoilCount"].toString())),
+            trailing: Chip(label: Text(userInfo["likeBoilCount"].toString())),
           ),
           Divider(),
           ListTile(
@@ -88,11 +85,12 @@ class UserInfoComponent extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => BoilListPage("评论过的",
-                        "/boils/list/user/${boilVo['userId']}/comment")),
-              ).then((value) => initUserStatus());
+                    builder: (context) => BoilListPage(
+                        "评论过的", "/boils/list/user/${userInfo['id']}/comment")),
+              );
             },
-            trailing: Chip(label: Text(userStatus["commentCount"].toString())),
+            trailing:
+                Chip(label: Text(userInfo["commentBoilCount"].toString())),
           ),
           Divider(),
         ],
@@ -101,19 +99,20 @@ class UserInfoComponent extends StatelessWidget {
   }
 }
 
-class FollowTextComponent extends StatelessWidget {
+class FollowTitleComponent extends StatelessWidget {
   int count;
   String title;
-  FollowTextComponent(this.count, this.title, {Key key}) : super(key: key);
+  int uid;
+  FollowTitleComponent(this.count, this.title, this.uid);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       child: Column(
         children: [
-          Text("${this.count}", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("${count}", style: TextStyle(fontWeight: FontWeight.bold)),
           Text(
-            this.title,
+            title,
             style: TextStyle(
               color: Colors.grey,
               decoration: TextDecoration.underline,
@@ -121,56 +120,18 @@ class FollowTextComponent extends StatelessWidget {
           ),
         ],
       ),
-      onTap: () async {
-        List<Widget> userList = [];
-        for (int i = 0; i < 20; i++) {
-          userList.add(
-            SimpleDialogOption(
-              onPressed: () {
-                // 返回id
-                Navigator.pop(context, 1);
-              },
-              child: ListTile(
-                trailing: RawChip(
-                  avatar: Icon(Icons.add, color: Colors.white),
-                  label: Text("关注", style: TextStyle(color: Colors.white)),
-                  backgroundColor: Colors.blue,
-                  onPressed: () {},
-                  elevation: 5,
-                ),
-                leading: CircleAvatar(
-                  backgroundColor: Colors.white,
-                  backgroundImage:
-                      NetworkImage("https://blog.icepan.cloud/0.jpg"),
-                ),
-                title: Row(
-                  children: [
-                    Text(
-                      "网名:dadad",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.0,
-                      ),
-                    ),
-                  ],
-                ),
-                subtitle: Text(
-                  "我轻轻的走,我轻轻的来",
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-            ),
-          );
+      onTap: () {
+        String pageTitle = title + "(${count})";
+        String api;
+        if (title == "关注者") {
+          api = "关注着api";
+        } else {
+          api = "关注中API";
         }
-        int i = await showDialog<int>(
-            context: context,
-            builder: (BuildContext context) {
-              return SimpleDialog(
-                title: Text(this.title + "(${this.count})"),
-                children: userList,
-              );
-            });
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => FollowUserListPage(pageTitle, api)));
       },
     );
   }

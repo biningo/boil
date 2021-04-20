@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:boil/network.dart';
 import 'package:boil/pages/user/user_info_component.dart';
 import 'package:boil/utils.dart';
@@ -13,31 +14,29 @@ class IsLoginComponent extends StatefulWidget {
 }
 
 class _IsLoginComponentState extends State<IsLoginComponent> {
-  Map userStatus = {"msgCount": 0, "userBoilCount": 0, "likeBoilCount": 0};
-  Map userMap;
-  _IsLoginComponentState() {
-    userMap = {
-      "userBio": GlobalState["userInfo"]["bio"],
-      "userId": GlobalState["userInfo"]["id"],
-      "userAvatarId": GlobalState["userInfo"]["avatarId"]
-    };
-  }
-
+  Map userInfo = {
+    "id": 0,
+    "isFollow": false,
+    "followerCount": 0,
+    "followingCount": 0,
+    "boilCount": 0,
+    "likeBoilCount": 0,
+    "commentBoilCount": 0,
+    "bio": "",
+    "username": "",
+    "avatarId": 0,
+  };
   @override
   void initState() {
     super.initState();
-    InitUserStatus();
+    InitUserInfo();
   }
 
-//转到其它页面
-  @override
-  void deactivate() {}
-
-  void InitUserStatus() async {
+  void InitUserInfo() async {
     Response resp =
-        await dio.get("/user/status/${GlobalState['userInfo']['id']}");
+        await dio.get("/user/info/${GlobalState['userInfo']['id']}");
     setState(() {
-      this.userStatus = resp.data["data"];
+      userInfo = resp.data['data'];
     });
   }
 
@@ -46,7 +45,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
     return Container(
       child: Column(
         children: [
-          UserInfoComponent(this.userMap, userStatus, InitUserStatus),
+          UserInfoComponent(userInfo),
           ListTile(
             leading:
                 Icon(Icons.notifications_active_outlined, color: Colors.blue),
@@ -54,7 +53,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
             onTap: () {
               Navigator.pushNamed(context, "/user/message");
             },
-            trailing: Chip(label: Text(userStatus["msgCount"].toString())),
+            trailing: Chip(label: Text("0")),
           ),
           SizedBox(height: 20.0),
           SizedBox(
@@ -84,11 +83,16 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
               onPressed: () async {
                 Navigator.pushNamed(context, "/user/edit",
                         arguments: GlobalState["userInfo"]["bio"])
-                    .then((value) => {
-                          setState(() {
-                            this.userMap["userBio"] = value;
-                          })
-                        });
+                    .then((value) async {
+                  setState(() {
+                    userInfo['bio'] = value;
+                  });
+                  GlobalState['userInfo']['bio'] = value;
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  prefs.setString(
+                      "userInfo", jsonEncode(GlobalState['userInfo']));
+                });
               },
             ),
           )
