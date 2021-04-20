@@ -3,7 +3,6 @@ import 'package:boil/pages/boil/boil_bottom.dart';
 import 'package:boil/pages/boil/boil_detail.dart';
 import 'package:boil/pages/boil/boil_list.dart';
 import 'package:boil/pages/boil/boil_user_component.dart';
-import 'package:boil/pages/user/user_info.dart';
 import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
 

@@ -14,24 +14,12 @@ class FollowUserListPage extends StatefulWidget {
 }
 
 class _FollowUserListPageState extends State<FollowUserListPage> {
-  List userList = [
-    {
-      "avatarId": 0,
-      "username": "dsda",
-      "bio": "哈哈哈哈",
-      "isFollow": true,
-    },
-    {
-      "avatarId": 0,
-      "username": "dsda",
-      "bio": "哈哈哈哈",
-      "isFollow": true,
-    }
-  ];
+  List userList = [];
 
   @override
   void initState() {
     super.initState();
+    InitUserList();
   }
 
   void InitUserList() async {
@@ -48,7 +36,7 @@ class _FollowUserListPageState extends State<FollowUserListPage> {
         title: Text(widget.title),
       ),
       body: ListView.builder(
-          itemCount: userList.length,
+          itemCount: userList == null ? 0 : userList.length,
           itemBuilder: (context, index) {
             return InkWell(
               child: ListTile(
@@ -59,23 +47,30 @@ class _FollowUserListPageState extends State<FollowUserListPage> {
                   label: Text(
                     userList[index]['isFollow'] ? "关注中" : "加关注",
                     style: TextStyle(
-                        color: Colors.black, fontWeight: FontWeight.w500),
+                        color: userList[index]['isFollow']
+                            ? Colors.white
+                            : Colors.black,
+                        fontWeight: FontWeight.w500),
                   ),
                   backgroundColor: userList[index]['isFollow']
-                      ? Colors.blue[300]
+                      ? Colors.lightBlue[300]
                       : Colors.grey[300],
-                  onPressed: () {
+                  onPressed: () async {
+                    Map userInfo = userList[index];
                     if (GlobalState['isLogin'] == false) {
                       Navigator.pushNamedAndRemoveUntil(
                           context, "/user", (route) => route == null);
                       return;
                     }
                     setState(() {
-                      userList[index]['isFollow'] =
-                          !userList[index]['isFollow'];
+                      userInfo['isFollow'] = !userInfo['isFollow'];
                     });
+                    if (userInfo['isFollow']) {
+                      await dio.get("/user/follow/${userInfo['id']}");
+                    } else {
+                      await dio.get("/user/unfollow/${userInfo['id']}");
+                    }
                   },
-                  elevation: 2,
                 ),
                 leading: CircleAvatar(
                   backgroundColor: Colors.white,
@@ -98,12 +93,12 @@ class _FollowUserListPageState extends State<FollowUserListPage> {
                 ),
               ),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => UserInfoPage(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UserInfoPage(userList[index]['id']),
+                  ),
+                );
               },
             );
           }),

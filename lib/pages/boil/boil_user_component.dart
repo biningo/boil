@@ -1,3 +1,4 @@
+import 'package:boil/network.dart';
 import 'package:boil/pages/user/user_info.dart';
 import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
@@ -20,22 +21,29 @@ class _BoilUserComponentState extends State<BoilUserComponent> {
               color: Colors.black),
           label: Text(
             widget.boilVo['userIsFollow'] ? "关注中" : "加关注",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                color:
+                    widget.boilVo['userIsFollow'] ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500),
           ),
           backgroundColor: widget.boilVo['userIsFollow']
-              ? Colors.blue[300]
+              ? Colors.lightBlue[300]
               : Colors.grey[300],
-          onPressed: () {
+          onPressed: () async {
+            if (GlobalState['isLogin'] == false) {
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/user", (route) => route == null);
+              return;
+            }
             setState(() {
-              if (GlobalState['isLogin'] == false) {
-                Navigator.pushNamedAndRemoveUntil(
-                    context, "/user", (route) => route == null);
-                return;
-              }
               widget.boilVo['userIsFollow'] = !widget.boilVo['userIsFollow'];
             });
+            if (widget.boilVo['userIsFollow']) {
+              await dio.get("/user/follow/${widget.boilVo['userId']}");
+            } else {
+              await dio.get("/user/unfollow/${widget.boilVo['userId']}");
+            }
           },
-          elevation: 2,
         ),
         leading: CircleAvatar(
           backgroundColor: Colors.white,

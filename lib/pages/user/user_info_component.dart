@@ -41,9 +41,11 @@ class UserInfoComponent extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
             child: Row(
               children: [
-                FollowTitleComponent(100, "关注者", userInfo['id']),
+                FollowTitleComponent(
+                    userInfo['followerCount'], "关注者", userInfo['id']),
                 SizedBox(width: 10),
-                FollowTitleComponent(100, "关注中", userInfo['id']),
+                FollowTitleComponent(
+                    userInfo['followingCount'], "关注中", userInfo['id']),
               ],
             ),
           ),
@@ -124,9 +126,9 @@ class FollowTitleComponent extends StatelessWidget {
         String pageTitle = title + "(${count})";
         String api;
         if (title == "关注者") {
-          api = "关注着api";
+          api = "/user/list/follower/${uid}";
         } else {
-          api = "关注中API";
+          api = "/user/list/following/${uid}";
         }
         Navigator.push(
             context,
