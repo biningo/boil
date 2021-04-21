@@ -1,5 +1,6 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/boil/boil_list.dart';
+import 'package:boil/pages/empty.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -28,40 +29,39 @@ class _TagsPageState extends State<TagsPage> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> tagChips = this
-        .tags
-        .map(
-          (tagVo) => RawChip(
-            avatar: Icon(Icons.tag),
-            label: Text(
-              tagVo['title'] + "(${tagVo['boilCount']})",
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 15.0),
-            ),
-            elevation: 8,
-            onPressed: () async {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BoilListPage(
-                      tagVo['title'], "/boils/list/tag/${tagVo['id']}"),
-                ),
-              );
-            },
-            pressElevation: 10,
-          ),
-        )
-        .toList();
     return Container(
-      alignment: Alignment.center,
-      padding: EdgeInsets.all(5.0),
-      child: GridView(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3, //横轴三个子widget
-            childAspectRatio: 2 //宽高比为1时，子widget
-            ),
-        children: tagChips,
-      ),
+      child: tags.length > 0
+          ? ListView.builder(
+              itemCount: this.tags.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  children: [
+                    InkWell(
+                      child: ListTile(
+                        leading:
+                            Icon(Icons.keyboard_arrow_right_rounded, size: 20),
+                        title: Text(
+                          "${tags[index]['title']}(${tags[index]['boilCount']})",
+                          style: TextStyle(fontSize: 20.0),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BoilListPage(
+                                tags[index]['title'],
+                                "/boils/list/tag/${tags[index]['id']}"),
+                          ),
+                        );
+                      },
+                    ),
+                    Divider()
+                  ],
+                );
+              },
+            )
+          : EmptyPage(),
     );
   }
 }

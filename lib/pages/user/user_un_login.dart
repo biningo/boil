@@ -21,24 +21,10 @@ class _UnLoginComponentState extends State<UnLoginComponent> {
         children: [
           SizedBox(height: 100),
           Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              child: new CircleAvatar(
-                backgroundColor: Colors.lightBlue,
-                child: Text(
-                  "可爱的头像",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-            ),
+            child: Image.network("https://blog.icepan.cloud/boil_logo.png",
+                height: 100, width: 100),
           ),
-          Padding(
-            child: Card(
-              child: LoginComponent(),
-            ),
-            padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-          )
+          LoginComponent()
         ],
       ),
     );
@@ -85,13 +71,10 @@ class _LoginComponentState extends State<LoginComponent> {
           SizedBox(height: 40.0),
           Wrap(
             children: [
-              RaisedButton(
-                color: Colors.blue[100],
+              OutlineButton(
                 child: Text("登录"),
                 onPressed: () async {
-                  LoadingDialog.show(context);
                   if (this.username == "" || this.password == "") {
-                    LoadingDialog.hide(context);
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
@@ -107,7 +90,6 @@ class _LoginComponentState extends State<LoginComponent> {
                         "/user/login",
                         data: {"username": username, "password": password},
                       );
-                      LoadingDialog.hide(context);
                       GlobalState["isLogin"] = true;
                       GlobalState["userInfo"] = resp.data["data"];
                       GlobalState["token"] = resp.data["token"];
@@ -118,13 +100,9 @@ class _LoginComponentState extends State<LoginComponent> {
                       Navigator.pushNamedAndRemoveUntil(
                           context, "/user", (route) => route == null);
                     } catch (e) {
-                      LoadingDialog.hide(context);
-                      prefs.setBool("isLogin", false);
-                      prefs.remove("userInfo");
-                      prefs.remove("token");
-                      GlobalState["isLogin"] = false;
-                      GlobalState["userInfo"] = "";
-                      GlobalState["token"] = "";
+                      // LoadingDialog.hide(context);
+                      // GlobalState['isLogin'] = false;
+                      // prefs.setBool("isLogin", false);
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -136,9 +114,8 @@ class _LoginComponentState extends State<LoginComponent> {
                 },
               ),
               SizedBox(width: 50),
-              RaisedButton(
+              OutlineButton(
                 child: Text("注册"),
-                color: Colors.green[200],
                 onPressed: () {
                   showDialog(
                     context: context,

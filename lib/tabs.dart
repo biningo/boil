@@ -55,7 +55,13 @@ class _TabsState extends State<Tabs> {
           },
         ),
         appBar: AppBar(
-          title: Text("Boil"),
+          title: Wrap(
+            children: [
+              Image.network("https://blog.icepan.cloud/boil_logo.png",
+                  width: 30, height: 30, color: Colors.white),
+              Text("Boil")
+            ],
+          ),
           centerTitle: true, //标题居中显示
           actions: <Widget>[
             IconButton(

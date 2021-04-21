@@ -18,7 +18,8 @@ class _BoilUserComponentState extends State<BoilUserComponent> {
       child: ListTile(
         trailing: RawChip(
           avatar: Icon(widget.boilVo['userIsFollow'] ? Icons.face : Icons.add,
-              color: Colors.black),
+              color:
+                  widget.boilVo['userIsFollow'] ? Colors.white : Colors.black),
           label: Text(
             widget.boilVo['userIsFollow'] ? "关注中" : "加关注",
             style: TextStyle(
@@ -54,7 +55,7 @@ class _BoilUserComponentState extends State<BoilUserComponent> {
         title: Row(
           children: [
             Text(
-              "网名:${widget.boilVo['username']}",
+              "${widget.boilVo['username']}",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(width: 10),

@@ -1,5 +1,6 @@
 import 'package:boil/network.dart';
 import 'package:boil/pages/boil/boil_item.dart';
+import 'package:boil/pages/empty.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -36,23 +37,25 @@ class _BoilListPageState extends State<BoilListPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          return Future.value(true);
-        },
-        child: Container(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              return Future.value(true);
-            },
-            child: ListView.builder(
-              itemCount: boilList.length,
-              itemBuilder: (context, index) =>
-                  BoilItem(boilList[index], InitBoilVoList),
-            ),
-          ),
-        ),
-      ),
+      body: boilList.length > 0
+          ? RefreshIndicator(
+              onRefresh: () async {
+                return Future.value(true);
+              },
+              child: Container(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    return Future.value(true);
+                  },
+                  child: ListView.builder(
+                    itemCount: boilList.length,
+                    itemBuilder: (context, index) =>
+                        BoilItem(boilList[index], InitBoilVoList),
+                  ),
+                ),
+              ),
+            )
+          : EmptyPage(),
     );
   }
 }

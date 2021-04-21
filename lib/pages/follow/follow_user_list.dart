@@ -43,7 +43,9 @@ class _FollowUserListPageState extends State<FollowUserListPage> {
                 trailing: RawChip(
                   avatar: Icon(
                       userList[index]['isFollow'] ? Icons.face : Icons.add,
-                      color: Colors.black),
+                      color: userList[index]['isFollow']
+                          ? Colors.white
+                          : Colors.black),
                   label: Text(
                     userList[index]['isFollow'] ? "关注中" : "加关注",
                     style: TextStyle(
@@ -81,7 +83,7 @@ class _FollowUserListPageState extends State<FollowUserListPage> {
                 title: Row(
                   children: [
                     Text(
-                      "网名:${userList[index]['username']}",
+                      "${userList[index]['username']}",
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ],
