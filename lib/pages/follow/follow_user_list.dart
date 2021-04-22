@@ -4,16 +4,16 @@ import 'package:boil/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
-class FollowUserListPage extends StatefulWidget {
+class UserListPage extends StatefulWidget {
   String title;
   String api;
-  FollowUserListPage(this.title, this.api, {Key key}) : super(key: key);
+  UserListPage(this.title, this.api, {Key key}) : super(key: key);
 
   @override
-  _FollowUserListPageState createState() => _FollowUserListPageState();
+  _UserListPageState createState() => _UserListPageState();
 }
 
-class _FollowUserListPageState extends State<FollowUserListPage> {
+class _UserListPageState extends State<UserListPage> {
   List userList = [];
 
   @override

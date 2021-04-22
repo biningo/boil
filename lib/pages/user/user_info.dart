@@ -22,7 +22,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
     "commentBoilCount": 0,
     "bio": "",
     "username": "",
-    "avatarId": 0,
+    "avatarId": -1,
   };
   bool isFollow = false;
 

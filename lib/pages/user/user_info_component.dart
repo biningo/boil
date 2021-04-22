@@ -23,7 +23,10 @@ class UserInfoComponent extends StatelessWidget {
                   child: CircleAvatar(
                     backgroundColor: Colors.white,
                     backgroundImage: NetworkImage(
-                        "https://blog.icepan.cloud/${userInfo['avatarId']}.jpg"),
+                      userInfo['avatarId'] != -1
+                          ? "https://blog.icepan.cloud/${userInfo['avatarId']}.jpg"
+                          : "https://blog.icepan.cloud/boil_logo.png",
+                    ),
                     radius: 60,
                   ),
                 ),
@@ -133,7 +136,7 @@ class FollowTitleComponent extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => FollowUserListPage(pageTitle, api)));
+                builder: (context) => UserListPage(pageTitle, api)));
       },
     );
   }

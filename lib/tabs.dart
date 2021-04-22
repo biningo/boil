@@ -4,6 +4,7 @@ import 'package:boil/pages/follow/follow.dart';
 import 'package:boil/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/follow/follow_user_list.dart';
 import 'pages/home/home.dart';
 import 'pages/search/search.dart';
 import 'pages/tags/tags.dart';
@@ -61,6 +62,17 @@ class _TabsState extends State<Tabs> {
                   width: 30, height: 30, color: Colors.white),
               Text("Boil")
             ],
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.supervisor_account),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserListPage("所有用户", "/user/all"),
+                ),
+              );
+            },
           ),
           centerTitle: true, //标题居中显示
           actions: <Widget>[

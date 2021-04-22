@@ -24,7 +24,7 @@ class _IsLoginComponentState extends State<IsLoginComponent> {
     "commentBoilCount": 0,
     "bio": "",
     "username": "",
-    "avatarId": 0,
+    "avatarId": -1,
   };
   @override
   void initState() {
