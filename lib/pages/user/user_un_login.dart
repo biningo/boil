@@ -82,11 +82,12 @@ class _LoginComponentState extends State<LoginComponent> {
                       ),
                     );
                   } else {
-                    LoadingDialog.show(context);
                     SharedPreferences prefs =
                         await SharedPreferences.getInstance();
-                    Response resp;
                     try {
+                      LoadingDialog.show(context);
+
+                      Response resp;
                       resp = await dio.post(
                         "/user/login",
                         data: {"username": username, "password": password},
@@ -102,10 +103,8 @@ class _LoginComponentState extends State<LoginComponent> {
                       Navigator.pushNamedAndRemoveUntil(
                           context, "/user", (route) => route == null);
                     } catch (e) {
-                      LoadingDialog.hide(context);
-                      // LoadingDialog.hide(context);
-                      // GlobalState['isLogin'] = false;
-                      // prefs.setBool("isLogin", false);
+                      GlobalState['isLogin'] = false;
+                      prefs.setBool("isLogin", false);
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
