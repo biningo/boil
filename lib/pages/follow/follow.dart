@@ -42,11 +42,21 @@ class _FollowPageState extends State<FollowPage> {
       children: recommendUserList
           .map((userInfo) => Column(
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.white,
-                    backgroundImage: NetworkImage(
-                        "https://blog.icepan.cloud/${userInfo['avatarId']}.jpg"),
-                    radius: 35,
+                  InkWell(
+                    child: CircleAvatar(
+                      backgroundColor: Colors.white,
+                      backgroundImage: NetworkImage(
+                          "https://blog.icepan.cloud/${userInfo['avatarId']}.jpg"),
+                      radius: 35,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => UserInfoPage(userInfo['id']),
+                        ),
+                      );
+                    },
                   ),
                   RawChip(
                     avatar: Icon(userInfo['isFollow'] ? Icons.face : Icons.add,
@@ -64,12 +74,14 @@ class _FollowPageState extends State<FollowPage> {
                         ? Colors.lightBlue[300]
                         : Colors.grey[300],
                     onPressed: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserInfoPage(userInfo['id']),
-                        ),
-                      );
+                      setState(() {
+                        userInfo['isFollow'] = !userInfo['isFollow'];
+                      });
+                      if (userInfo['isFollow']) {
+                        await dio.get("/user/follow/${userInfo['id']}");
+                      } else {
+                        await dio.get("/user/unfollow/${userInfo['id']}");
+                      }
                     },
                   ),
                 ],

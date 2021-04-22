@@ -13,11 +13,11 @@ class UserInfoComponent extends StatelessWidget {
         children: [
           Stack(
             children: [
-              Container(height: 200, color: Colors.green[300]),
+              Container(height: 150),
               Positioned(
                 left: 10,
                 right: 10,
-                top: 90,
+                top: 40,
                 bottom: 0,
                 child: Align(
                   child: CircleAvatar(
@@ -33,11 +33,17 @@ class UserInfoComponent extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 10),
+          Container(
+            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+            child: Text("江湖人称: " + userInfo["username"],
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.black)),
+          ),
           Container(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: Text(userInfo["bio"],
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style:
+                    TextStyle(fontWeight: FontWeight.w300, color: Colors.grey)),
           ),
           Container(
             alignment: Alignment.bottomLeft,

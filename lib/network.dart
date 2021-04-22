@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 class DioClient {
   Dio dio;
   DioClient() {
-    BaseOptions options =
-        BaseOptions(baseUrl: "http://192.168.0.23:8080", connectTimeout: 2000);
+    BaseOptions options = BaseOptions(
+        baseUrl: "http://121.196.169.248:9090", connectTimeout: 5000);
     dio = Dio(options);
     dio.interceptors.add(
       InterceptorsWrapper(onRequest: (options, handler) {
