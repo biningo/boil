@@ -86,7 +86,7 @@ class _BoilItemState extends State<BoilItem> {
         child: Card(
           child: Column(
             children: [
-              BoilUserComponent(widget.boilVo),
+              BoilUserComponent(widget.boilVo, widget.initBoilList),
               Container(
                 padding:
                     EdgeInsets.fromLTRB(10, 5, 10, 10), //left top right bottom

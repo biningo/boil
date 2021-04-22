@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 
 class BoilUserComponent extends StatefulWidget {
   Map boilVo;
-  BoilUserComponent(this.boilVo, {Key key}) : super(key: key);
+  Function initBoilList;
+  BoilUserComponent(this.boilVo, this.initBoilList, {Key key})
+      : super(key: key);
 
   @override
   _BoilUserComponentState createState() => _BoilUserComponentState();
@@ -44,6 +46,7 @@ class _BoilUserComponentState extends State<BoilUserComponent> {
             } else {
               await dio.get("/user/unfollow/${widget.boilVo['userId']}");
             }
+            widget.initBoilList();
           },
         ),
         leading: CircleAvatar(

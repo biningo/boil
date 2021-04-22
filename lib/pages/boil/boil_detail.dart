@@ -40,7 +40,7 @@ class _BoilDetailPageState extends State<BoilDetailPage> {
       body: Container(
         child: Column(
           children: [
-            BoilUserComponent(widget.boilVo),
+            BoilUserComponent(widget.boilVo, () {}),
             Container(
               padding:
                   EdgeInsets.fromLTRB(10, 5, 10, 10), //left top right bottom
