@@ -5,7 +5,7 @@ class DioClient {
   Dio dio;
   DioClient() {
     BaseOptions options = BaseOptions(
-        baseUrl: "http://121.196.169.248:9090", connectTimeout: 5000);
+        baseUrl: "http://192.168.0.23:9090", connectTimeout: 5000);
     dio = Dio(options);
     dio.interceptors.add(
       InterceptorsWrapper(onRequest: (options, handler) {
