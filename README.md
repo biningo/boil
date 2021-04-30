@@ -1,16 +1,10 @@
 # boil
 
-A new Flutter project.
+一款类似于![Twitter Badge](https://img.shields.io/badge/-twitter-00acee?style=flat-square&logo=Twitter&logoColor=white)的app，实现了 **点赞、一级评论、用户关注、用户推荐** 功能
 
-## Getting Started
+点赞采用Redis实现
 
-This project is a starting point for a Flutter application.
+![](assets/boil1.jpg)![](assets/boil2.jpg)![](assets/boil3.jpg)![](assets/boil4.jpg)![](assets/boil5.jpg)![](assets/boil6.jpg)
 
-A few resources to get you started if this is your first Flutter project:
+> 所有的用户密码都为`55555`，apk包可以在release中下载体验
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
